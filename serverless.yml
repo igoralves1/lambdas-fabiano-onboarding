@@ -1,19 +1,18 @@
 service: lambdas-fabiano-onboarding
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
 
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
+# app: simemap
+# org: simemap
+
 frameworkVersion: '3'
+
+custom:
+  fnTest1FabianoOnboarding: 'fnTest1FabianoOnboarding'
 
 provider:
   name: aws
-  runtime: nodejs12.x
-
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
+  runtime: nodejs16.x
+  stage: ${opt:stage, 'dev'}
+  region: ${file(env.yml):${self:provider.stage}.region}
 
 # you can add statements to the Lambda function's IAM Role here
 #  iam:
@@ -46,15 +45,17 @@ provider:
 #    - include-me-dir/**
 
 functions:
-  hello:
-    handler: handler.hello
+  fnTest1FabianoOnboarding:
+    name: ${self:provider.stage}-${self:service}-${self:custom.fnTest1FabianoOnboarding}
+    handler: fnTest1FabianoOnboarding.fnTest1FabianoOnboarding
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
-#    events:
-#      - httpApi:
-#          path: /users/create
-#          method: get
+    events:
+      - httpApi:
+          path: /fabiano/test
+          method: get
+          authorizer: ${file(env.yml):${self:provider.stage}.authorizer}
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)
@@ -62,8 +63,9 @@ functions:
 #      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
 #      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
 #      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
-#      - iot:
-#          sql: "SELECT * FROM 'some_topic'"
+      - iot:
+          name: ${self:provider.stage}_${self:custom.fnTest1FabianoOnboarding}
+          sql: "SELECT * AS topic FROM '${file(env.yml):${self:provider.stage}.mqttTopicEnv}/fabiano/onboarding/17X35'"
 #      - cloudwatchEvent:
 #          event:
 #            source:
